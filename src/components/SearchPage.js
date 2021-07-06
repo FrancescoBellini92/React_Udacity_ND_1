@@ -17,16 +17,16 @@ export class SearchPage extends React.Component {
 
 		const hasMinimunLength = searchText.length > 0;
 		if (hasMinimunLength) {
-			this.getData();
+			this.getData(searchText);
 		} else {
 			this.setState({books: []});
 		}
 	}
 
-	async getData() {
+	async getData(text) {
 		this.props.showSpinnerFn(true);
 
-		const books = await search(this.state.searchText);
+		const books = await search(text);
 		const hasResults = books instanceof Array;
 		const hasText = this.state.searchText.length > 0
 
