@@ -15,9 +15,11 @@ export class SearchPage extends React.Component {
 		const searchText = $event.target.value;
 		this.setState({searchText});
 
-		const hasMinimunLength = searchText.length > 3;
+		const hasMinimunLength = searchText.length > 0;
 		if (hasMinimunLength) {
 			this.getData();
+		} else {
+			this.setState({books: []});
 		}
 	}
 
@@ -26,8 +28,9 @@ export class SearchPage extends React.Component {
 
 		const books = await search(this.state.searchText);
 		const hasResults = books instanceof Array;
+		const hasText = this.state.searchText.length > 0
 
-		this.setState((state, props) => ({books: hasResults ? books.filter(b => !!b.imageLinks?.thumbnail): []}));
+		this.setState((state, props) => ({books: (hasResults && hasText) ? books.filter(b => !!b.imageLinks?.thumbnail): []}));
 		this.props.showSpinnerFn(false);
 	}
 
@@ -60,7 +63,7 @@ export class SearchPage extends React.Component {
 				)}
 
 				{this.state.books.length === 0 && (
-					<p class="empty-search-text">{!!this.state.searchText ? 'No results' : 'Try searching some books'}</p>
+					<p className="empty-search-text">{!!this.state.searchText ? 'No results' : 'Try searching some books'}</p>
 				)}
 			</div>
 		</div>
