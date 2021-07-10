@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Book } from './Book';
 
 const shelvesMap = {
@@ -17,3 +18,9 @@ export const BookShelf = ({shelf, books, moveToFn}) => (
 		</div>
 	</div>
 )
+
+BookShelf.propTypes = {
+	shelf: PropTypes.string,
+	books: PropTypes.arrayOf(PropTypes.object),
+	moveToFn: PropTypes.func
+};

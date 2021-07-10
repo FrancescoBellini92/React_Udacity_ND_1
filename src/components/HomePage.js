@@ -1,7 +1,8 @@
 import  React  from 'react';
+import  PropTypes  from 'prop-types';
 import { Link } from 'react-router-dom';
-import { BookShelf } from './BookShelf';
 
+import { BookShelf } from './BookShelf';
 export const HomePage = ({shelves, books, moveToFn}) => (
 	<div className="list-books">
 		<div className="list-books-title">
@@ -21,3 +22,9 @@ export const HomePage = ({shelves, books, moveToFn}) => (
 		</div>
 	</div>
 );
+
+HomePage.propTypes = {
+	shelves: PropTypes.arrayOf(PropTypes.sting),
+	books: PropTypes.arrayOf(PropTypes.object),
+	moveToFn: PropTypes.func
+};

@@ -1,9 +1,16 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { search } from '../BooksAPI';
 import { Book } from './Book';
 
 export class SearchPage extends React.Component {
+
+	static propTypes = {
+		currentBooks: PropTypes.arrayOf(PropTypes.object),
+		showSpinnerFn: PropTypes.func,
+		saveBookFn: PropTypes.func
+	};
 
 	state = {
 		searchText: '',

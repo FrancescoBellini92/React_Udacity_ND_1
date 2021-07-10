@@ -1,4 +1,5 @@
 import React from "react"
+import PropTypes from "prop-types"
 
 export const Book = ({book, moveToFn}) => (
 	<div className="book">
@@ -21,3 +22,8 @@ export const Book = ({book, moveToFn}) => (
 		</div>
 	</div>
 )
+
+Book.propTypes = {
+	book: PropTypes.object,
+	moveToFn: PropTypes.func
+};
