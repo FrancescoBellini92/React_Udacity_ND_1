@@ -1,50 +1,50 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import { search } from '../BooksAPI';
 import { Book } from './Book';
+import { store } from '../store/Store';
+import { searchBooks } from '../store/actions';
 
 export class SearchPage extends React.Component {
 
+
 	static propTypes = {
 		currentBooks: PropTypes.arrayOf(PropTypes.object),
-		showSpinnerFn: PropTypes.func,
-		saveBookFn: PropTypes.func
 	};
 
-	state = {
-		searchText: '',
-		books: []
-	}
+	debounceTimer;
 
+	storeSubscription;
 
-	async search($event) {
-		const searchText = $event.target.value;
-		this.setState({searchText});
-
-		const hasMinimunLength = searchText.length > 0;
-		if (hasMinimunLength) {
-			this.getData(searchText);
-		} else {
-			this.setState({books: []});
+	constructor(props) {
+		super(props);
+		this.state = {
+			searchedText: store.state.searchedText,
+			searchedBooks: store.state.searchedBooks
 		}
 	}
 
-	async getData(text) {
-		this.props.showSpinnerFn(true);
+	componentDidMount() {
+		this.storeSubscription = store.subscribe(({searchedText, searchedBooks}) => this.setState({searchedText, searchedBooks}));
+	}
 
-		const books = await search(text);
-		const hasResults = books instanceof Array;
-		const hasText = this.state.searchText.length > 0
+	componentWillUnmount() {
+    this.storeSubscription.unsubscribe();
+  }
 
-		this.setState((state, props) => ({books: (hasResults && hasText) ? books.filter(b => !!b.imageLinks?.thumbnail): []}));
-		this.props.showSpinnerFn(false);
+
+	async search($event) {
+		if (this.debounceTimer) {
+			clearTimeout(this.debounceTimer);
+		}
+
+		const searchedText = $event.target.value;
+		this.debounceTimer = setTimeout(() => store.dispatch(searchBooks(searchedText)), 500);
 	}
 
 	getCurrentBook(bookId) {
 		return this.props.currentBooks.find(book => book.id === bookId);
 	}
-
 
 	render() { return (
 		<div className="search-books">
@@ -53,24 +53,24 @@ export class SearchPage extends React.Component {
 					<button className="close-search" >Close</button>
 				</Link>
 				<div className="search-books-input-wrapper">
-					<input type="text" placeholder="Search by title or author" value={this.state.searchText} onChange={$event => this.search($event)}/>
+					<input type="text" placeholder="Search by title or author" onChange={$event => this.search($event)}/>
 				</div>
 			</div>
 
 			<div className="search-books-results">
-				{this.state.books.length > 0 && (
+				{this.state.searchedBooks.length > 0 && (
 					<ol className="books-grid">
-						{this.state.books.map(book => (
+						{this.state.searchedBooks.map(book => (
 							<li key={book.id}>
-									<Book book={this.getCurrentBook(book.id) || book} moveToFn={this.props.saveBookFn}>
+									<Book book={this.getCurrentBook(book.id) || book}>
 									</Book>
 							</li>
 						))}
 						</ol>
 				)}
 
-				{this.state.books.length === 0 && (
-					<p className="empty-search-text">{!!this.state.searchText ? 'No results' : 'Try searching some books'}</p>
+				{this.state.searchedBooks.length === 0 && (
+					<p className="empty-search-text">{!!this.state.searchedText ? 'No results' : 'Try searching some books'}</p>
 				)}
 			</div>
 		</div>

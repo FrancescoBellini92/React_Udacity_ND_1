@@ -1,13 +1,15 @@
 import React from "react"
 import PropTypes from "prop-types"
+import { updateBooks } from "../store/actions";
+import { store } from "../store/Store";
 
-export const Book = ({book, moveToFn}) => (
+export const Book = ({book}) => (
 	<div className="book">
 		<div className="book-top">
 			<div className="book-cover" style={{ width: 128, height: 193, backgroundImage: `url(${book.imageLinks.thumbnail}`}}>
 			</div>
 				<div className="book-shelf-changer">
-					<select value={book.shelf || 'none'} onChange={$event => moveToFn ? moveToFn($event, book) : null}>
+					<select value={book.shelf || 'none'} onChange={$event => store.dispatch(updateBooks(book, $event.target.value))}>
 						<option value="move" disabled>Move to...</option>
 						<option value="currentlyReading">Currently Reading</option>
 						<option value="wantToRead">Want to Read</option>
@@ -25,5 +27,4 @@ export const Book = ({book, moveToFn}) => (
 
 Book.propTypes = {
 	book: PropTypes.object,
-	moveToFn: PropTypes.func
 };
