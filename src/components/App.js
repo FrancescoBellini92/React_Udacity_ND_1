@@ -7,64 +7,42 @@ import { store } from '../store/Store';
 
 import {  getBooksRequest, updateBooks } from '../store/actions';
 import '../styles/App.css';
-
+import { connect } from './utils/connect';
 class BooksApp extends React.Component {
 
-  state;
-
-  storeSubscription;
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      ...store.state
-    };
-  }
-
-
-  async componentDidMount() {
-    this.storeSubscription = store.subscribe(state => {
-
-      this.setState(state)
-    });
-    await this._getData();
-  }
-
-  componentWillUnmount() {
-    this.storeSubscription.unsubscribe();
-  }
-
-  async _getData() {
-    store.dispatch(getBooksRequest());
+  componentDidMount() {
+    this.props.getData();
   }
 
   moveToShelfFn = async ($event, book) => {
     const shelf = ($event.target.value);
-    store.dispatch(updateBooks(book, shelf))
+    this.props.updateData(book, shelf);
   }
-
-  toggleSpinner = showSpinner => this.setState({showSpinner});
 
   render() { return (
       <BrowserRouter>
         <div className="app">
-          {this.state.showSpinner && (<Spinner></Spinner>)}
+          {this.props.showSpinner && (<Spinner></Spinner>)}
         <Switch>
 
           <Route path="/search">
-            <SearchPage currentBooks={this.state.books}></SearchPage>
+            <SearchPage currentBooks={this.props.books}></SearchPage>
           </Route>
 
           <Route path="/">
-            <HomePage shelves={this.state.shelves} books={this.state.books}></HomePage>
+            <HomePage shelves={this.props.shelves} books={this.props.books}></HomePage>
           </Route>
 
         </Switch>
 
       </div>
-    </BrowserRouter>
+      </BrowserRouter>
   )}
-
 }
 
-export default BooksApp
+const ConnectedBooskApp = connect(
+  {showSpinner : 'showSpinner', books: 'books', shelves: 'shelves'},
+  {getData: () => store.dispatch(getBooksRequest()), updateData: (book, shelf) => store.dispatch(updateBooks(book, shelf))})
+  (BooksApp);
+
+export default ConnectedBooskApp
