@@ -1,37 +1,13 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { Book } from './Book';
 import { store } from '../store/Store';
 import { searchBooks } from '../store/actions';
+import { connect } from './utils/connect';
 
-export class SearchPage extends React.Component {
-
-
-	static propTypes = {
-		currentBooks: PropTypes.arrayOf(PropTypes.object),
-	};
+class SearchPage extends React.Component {
 
 	debounceTimer;
-
-	storeSubscription;
-
-	constructor(props) {
-		super(props);
-		this.state = {
-			searchedText: store.state.searchedText,
-			searchedBooks: store.state.searchedBooks
-		}
-	}
-
-	componentDidMount() {
-		this.storeSubscription = store.subscribe(({searchedText, searchedBooks}) => this.setState({searchedText, searchedBooks}));
-	}
-
-	componentWillUnmount() {
-    this.storeSubscription.unsubscribe();
-  }
-
 
 	async search($event) {
 		if (this.debounceTimer) {
@@ -39,7 +15,7 @@ export class SearchPage extends React.Component {
 		}
 
 		const searchedText = $event.target.value;
-		this.debounceTimer = setTimeout(() => store.dispatch(searchBooks(searchedText)), 500);
+		this.debounceTimer = setTimeout(() => this.props.search(searchedText), 500);
 	}
 
 	getCurrentBook(bookId) {
@@ -58,9 +34,9 @@ export class SearchPage extends React.Component {
 			</div>
 
 			<div className="search-books-results">
-				{this.state.searchedBooks.length > 0 && (
+				{this.props.searchedBooks.length > 0 && (
 					<ol className="books-grid">
-						{this.state.searchedBooks.map(book => (
+						{this.props.searchedBooks.map(book => (
 							<li key={book.id}>
 									<Book book={this.getCurrentBook(book.id) || book}>
 									</Book>
@@ -69,11 +45,21 @@ export class SearchPage extends React.Component {
 						</ol>
 				)}
 
-				{this.state.searchedBooks.length === 0 && (
-					<p className="empty-search-text">{!!this.state.searchedText ? 'No results' : 'Try searching some books'}</p>
+				{this.props.searchedBooks.length === 0 && (
+					<p className="empty-search-text">{!!this.props.searchedText ? 'No results' : 'Try searching some books'}</p>
 				)}
 			</div>
 		</div>
 	)}
 }
 
+
+const ConnectedSearchPage = connect({
+	currentBooks: 'books',
+	searchedText: 'searchedText',
+	searchedBooks: 'searchedBooks',
+	},
+	{search: searchedText => store.dispatch(searchBooks(searchedText))})
+	(SearchPage);
+
+export default ConnectedSearchPage;

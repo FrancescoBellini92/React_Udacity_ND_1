@@ -1,7 +1,7 @@
 import React from 'react'
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { HomePage } from './HomePage';
-import { SearchPage } from './SearchPage';
+import SearchPage from './SearchPage';
 import { Spinner } from './Spinner';
 import { store } from '../store/Store';
 
@@ -26,7 +26,7 @@ class BooksApp extends React.Component {
         <Switch>
 
           <Route path="/search">
-            <SearchPage currentBooks={this.props.books}></SearchPage>
+            <SearchPage></SearchPage>
           </Route>
 
           <Route path="/">

@@ -1,7 +1,7 @@
 import React from "react";
 import { StoreConsumer } from "./StoreContext";
 
-export const connect = (mapStateToProps, mapActionsToPRops) => Component => {
+export const connect = (mapStateToProps, mapActionsToProps) => Component => {
 
   class Receiver extends React.Component {
 
@@ -26,7 +26,7 @@ export const connect = (mapStateToProps, mapActionsToPRops) => Component => {
     getStateFromMap(store) {
       const state = {};
       Object.entries(mapStateToProps).forEach(([key, val]) => state[key] = store[val]);
-      Object.entries(mapActionsToPRops).forEach(([key, val]) => state[key] = val);
+      Object.entries(mapActionsToProps).forEach(([key, val]) => state[key] = val);
       return state;
     }
 
@@ -37,7 +37,7 @@ export const connect = (mapStateToProps, mapActionsToPRops) => Component => {
 
   const Consumer = () =>
     <StoreConsumer>
-      {value => <Receiver store={value} test={'test'}></Receiver>}
+      {value => <Receiver store={value}></Receiver>}
     </StoreConsumer>
 
   return Consumer;
