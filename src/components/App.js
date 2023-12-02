@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { getAll, update } from '../BooksAPI';
 import { HomePage } from './HomePage';
@@ -8,53 +8,56 @@ import { Spinner } from './Spinner';
 import '../styles/App.css';
 
 
-class BooksApp extends React.Component {
+const BooksApp =  () => {
 
-  state = {
-    showSpinner: false,
-    shelves: [],
-    books: []
-  };
+  const [showSpinner, setShowSpinner] = useState();
+  const [shelves, setShelves] = useState([]);
+  const [books, setBooks] = useState([]);
 
-  async componentDidMount() {
-    await this._getData();
-  }
+  useEffect(() => {
+    let mounted = true;
 
-  async _getData() {
-    this.setState((state, props) => ({showSpinner : true}));
+    setShowSpinner(true);
+    getData().then(() => mounted && setShowSpinner(false))
+
+    return () => mounted = false;
+  }, []);
+
+
+  const getData = async () => {
     const books = await getAll();
     const shelves = [...new Set(books.map(b => b.shelf))];
-    this.setState((state, props) => ({ books, shelves, showSpinner: false }));
+    setBooks(books)
+    setShelves(shelves);
   }
 
-  moveToShelfFn = async ($event, book) => {
+  const moveToShelf = async ($event, book) => {
+    setShowSpinner(true);
     const shelf = ($event.target.value)
     await update(book, shelf);
-    this._getData();
+    await getData();
+    setShowSpinner(false)
+
   }
 
-  toggleSpinner = showSpinner => this.setState({showSpinner});
-
-  render() { return (
+  return (
       <BrowserRouter>
         <div className="app">
-          {this.state.showSpinner && (<Spinner></Spinner>)}
+          {showSpinner && (<Spinner></Spinner>)}
         <Switch>
 
           <Route path="/search">
-            <SearchPage currentBooks={this.state.books} saveBookFn={this.moveToShelfFn} showSpinnerFn={this.toggleSpinner}></SearchPage>
+            <SearchPage currentBooks={books} moveToShelf={moveToShelf} showSpinner={setShowSpinner}></SearchPage>
           </Route>
 
           <Route path="/">
-            <HomePage shelves={this.state.shelves} books={this.state.books} moveToFn={this.moveToShelfFn}></HomePage>
+            <HomePage shelves={shelves} books={books} moveToShelf={moveToShelf}></HomePage>
           </Route>
 
         </Switch>
-
       </div>
     </BrowserRouter>
-  )}
-
+  )
 }
 
 export default BooksApp

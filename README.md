@@ -8,5 +8,5 @@ The main goal was to become familiar with React components (props, state) and re
 To run the project locally:
 
 - Fork and clone the repo
-- Install all required dependencies via npm install
+- Install all required dependencies via npm install (node version must be ^16)
 - Run the dev server via npm start
