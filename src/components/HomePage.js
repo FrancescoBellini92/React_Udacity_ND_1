@@ -1,8 +1,9 @@
 import  React  from 'react';
 import { Link } from 'react-router-dom';
 import { BookShelf } from './BookShelf';
+import PropTypes from 'prop-types';
 
-export const HomePage = ({shelves, books, moveToFn}) => (
+export const HomePage = ({shelves, books, moveToShelf}) => (
 	<div className="list-books">
 		<div className="list-books-title">
 			<h1>MyReads</h1>
@@ -10,7 +11,7 @@ export const HomePage = ({shelves, books, moveToFn}) => (
 		<div className="list-books-content">
 			{shelves.map(shelf => (
 				<div key={shelf}>
-					<BookShelf shelf={shelf} books={books.filter(book => book.shelf === shelf)} moveToFn={moveToFn} />
+					<BookShelf shelf={shelf} books={books.filter(book => book.shelf === shelf)} moveToShelf={moveToShelf} />
 				</div>
 			))}
 		</div>
@@ -21,3 +22,9 @@ export const HomePage = ({shelves, books, moveToFn}) => (
 		</div>
 	</div>
 );
+
+HomePage.propTypes = {
+	shelves: PropTypes.array,
+	books: PropTypes.array,
+	moveToShelf: PropTypes.func
+}

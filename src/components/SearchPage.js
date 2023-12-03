@@ -1,69 +1,81 @@
-import React from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { search } from '../BooksAPI';
 import { Book } from './Book';
+import PropTypes from 'prop-types';
 
-export class SearchPage extends React.Component {
+export const SearchPage = ({currentBooks, showSpinner, moveToShelf }) => {
 
-	state = {
-		searchText: '',
-		books: []
-	}
+	const [searchText, setSearchText] = useState('');
+	const [books, setBooks] = useState([]);
 
+	const getData = async (searchString) => {
+		showSpinner(true);
 
-	async search($event) {
-		const searchText = $event.target.value;
-		this.setState({searchText});
-
-		const hasMinimunLength = searchText.length > 3;
-		if (hasMinimunLength) {
-			this.getData();
-		}
-	}
-
-	async getData() {
-		this.props.showSpinnerFn(true);
-
-		const books = await search(this.state.searchText);
+		const books = await search(searchString);
 		const hasResults = books instanceof Array;
+		setBooks( hasResults ? books.filter(b => !!b.imageLinks?.thumbnail): [])
 
-		this.setState((state, props) => ({books: hasResults ? books.filter(b => !!b.imageLinks?.thumbnail): []}));
-		this.props.showSpinnerFn(false);
+		showSpinner(false);
 	}
 
-	getCurrentBook(bookId) {
-		return this.props.currentBooks.find(book => book.id === bookId);
+	const debouncedGetData = useDebounce(getData, 200);
+	const onSearch = async ($event) => {
+		const newSearchText = $event.target.value;
+		setSearchText(newSearchText)
+
+		debouncedGetData(newSearchText);
 	}
 
+	const getCurrentBook = (bookId) => currentBooks.find(book => book.id === bookId);
 
-	render() { return (
+	return (
 		<div className="search-books">
 			<div className="search-books-bar">
 				<Link to="/">
 					<button className="close-search" >Close</button>
 				</Link>
 				<div className="search-books-input-wrapper">
-					<input type="text" placeholder="Search by title or author" value={this.state.searchText} onChange={$event => this.search($event)}/>
+					<input type="text" placeholder="Search by title or author" value={searchText} onChange={onSearch}/>
 				</div>
 			</div>
 
 			<div className="search-books-results">
-				{this.state.books.length > 0 && (
+				{books.length > 0 && (
 					<ol className="books-grid">
-						{this.state.books.map(book => (
+						{books.map(book => (
 							<li key={book.id}>
-									<Book book={this.getCurrentBook(book.id) || book} moveToFn={this.props.saveBookFn}>
+									<Book book={getCurrentBook(book.id) || book} moveToShelf={moveToShelf}>
 									</Book>
 							</li>
 						))}
 						</ol>
 				)}
 
-				{this.state.books.length === 0 && (
-					<p class="empty-search-text">{!!this.state.searchText ? 'No results' : 'Try searching some books'}</p>
+				{books.length === 0 && (
+					<p className="empty-search-text">{!!searchText ? 'No results' : 'Try searching some books'}</p>
 				)}
 			</div>
 		</div>
-	)}
+	)
 }
 
+SearchPage.propTypes = {
+	currentBooks: PropTypes.array,
+	showSpinner: PropTypes.func,
+	moveToShelf: PropTypes.func
+};
+
+
+const useDebounce = (callback, timeout) => {
+	const ref = useRef();
+
+	const debounced = useCallback((...args) => {
+		if (ref.current) {
+			clearTimeout(ref.current)
+		}
+		ref.current = setTimeout(() => callback(...args), timeout)
+	}, [callback, timeout])
+
+	return debounced
+}
